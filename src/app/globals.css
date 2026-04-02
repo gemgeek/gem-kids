@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+:root {
+  --gem-orange: #FF9F1C;
+  --gem-lime: #A3E635;
+  --gem-blue: #3B82F6;
+}
+
+body {
+  background: var(--gem-orange);
+  overflow-x: hidden;
+}
+
+.perspective-container {
+  perspective: 1200px;
+}
+
+.book-page-left {
+  transform: rotateY(15deg);
+  transform-origin: right center;
+  background: linear-gradient(135deg, #D9F99D 0%, #BEF264 100%);
+}
+
+.book-page-right {
+  transform: rotateY(-15deg);
+  transform-origin: left center;
+  background: linear-gradient(-135deg, #D9F99D 0%, #BEF264 100%);
+}
