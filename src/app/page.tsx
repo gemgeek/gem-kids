@@ -465,6 +465,19 @@ export default function HomePage() {
 
       </div>
 
+      {/* PORTRAIT MODE WARNING FOR MOBILE */}
+      <div className="hidden max-md:portrait:flex fixed inset-0 z-9999 bg-[#FF9F1C] flex-col items-center justify-center text-center p-8 text-white animate-in fade-in duration-300">
+          <div className="text-7xl mb-6 flex items-center justify-center">
+              <span className="animate-[spin_3s_linear_infinite]"></span>
+          </div>
+          <h2 className="text-4xl font-black font-serif italic mb-4 tracking-wide text-white drop-shadow-md">
+              Rotate Phone!
+          </h2>
+          <p className="text-xl font-bold text-white/90 drop-shadow-sm max-w-[80%] mx-auto">
+              Please turn your device sideways to launch the GEM Kids OS.
+          </p>
+      </div>
+
       {/* CUSTOM OS ALERT MODAL */}
       {osAlert && (
           <div className="fixed inset-0 z-200 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-in zoom-in duration-200">
