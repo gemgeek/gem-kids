@@ -65,7 +65,7 @@ export default function HomePage() {
   const [history, setHistory] = useState<(string | null)[]>([null]);
   const [historyIndex, setHistoryIndex] = useState(0);
 
-  // PWA INSTALL STATES 
+  // --- PWA INSTALL STATES ---
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
@@ -77,11 +77,11 @@ export default function HomePage() {
           setShowWelcome(true);
       }
 
-      // Detect if the user is on an iPhone/iPad
+      // 1. Detect if the user is on an iPhone/iPad
       const userAgent = window.navigator.userAgent.toLowerCase();
       const isAppleDevice = /iphone|ipad|ipod/.test(userAgent);
       
-      // Check if the app is already installed
+      // 2. Check if the app is already installed
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
 
       if (isAppleDevice && !isStandalone) {
@@ -90,7 +90,7 @@ export default function HomePage() {
           setTimeout(() => setShowInstallPrompt(true), 3000); 
       }
 
-      // Listen for Android/Chrome install event
+      // 3. Listen for Android/Chrome install event
       const handleBeforeInstall = (e: any) => {
           e.preventDefault(); 
           setDeferredPrompt(e); 
@@ -99,7 +99,7 @@ export default function HomePage() {
 
       window.addEventListener('beforeinstallprompt', handleBeforeInstall);
 
-      // Hide modal if they successfully install it
+      // 4. Hide modal if they successfully install it
       window.addEventListener('appinstalled', () => {
           setShowInstallPrompt(false);
       });
@@ -247,14 +247,14 @@ export default function HomePage() {
                             {/* HELP DROPDOWN - FIXED Z-INDEX */}
                             {item === 'Help' && activeMenu === 'Help' && (
                                 <div className="absolute top-full left-0 mt-1 w-56 bg-white rounded-lg shadow-2xl border border-gray-200 overflow-hidden animate-in slide-in-from-top-2 z-999">
-                                    <a href="mailto:gemstudioinfo.tech@gmail.com?subject=GEM Kids Inquiry" className="flex items-center gap-3 p-3 hover:bg-blue-50 transition-colors border-b border-gray-100 group">
+                                    <a href="mailto:hello@gemstudio.com?subject=GEM Kids Inquiry" className="flex items-center gap-3 p-3 hover:bg-blue-50 transition-colors border-b border-gray-100 group">
                                         <Mail size={16} className="text-blue-500 group-hover:scale-110 transition-transform" />
                                         <div className="flex flex-col">
                                             <span className="text-sm font-bold text-gray-800">Contact Support</span>
                                             <span className="text-[10px] font-normal text-gray-500">Email GEM Studio</span>
                                         </div>
                                     </a>
-                                    <a href="mailto:gemstudioinfo.tech@gmail.com?subject=GEM Kids Review/Feedback" className="flex items-center gap-3 p-3 hover:bg-yellow-50 transition-colors group">
+                                    <a href="mailto:hello@gemstudio.com?subject=GEM Kids Review/Feedback" className="flex items-center gap-3 p-3 hover:bg-yellow-50 transition-colors group">
                                         <Star size={16} className="text-yellow-500 group-hover:scale-110 transition-transform" />
                                         <div className="flex flex-col">
                                             <span className="text-sm font-bold text-gray-800">Leave a Review</span>
@@ -294,8 +294,8 @@ export default function HomePage() {
         </>
       )}
 
-      {/* CONTENT AREA */}
-      <div className="flex-1 relative flex items-center justify-center py-6 z-30 overflow-visible">
+      {/* CONTENT AREA WITH SAFE MOBILE SCALING */}
+      <div className="flex-1 relative flex items-center justify-center py-6 z-30 overflow-visible landscape:max-h-[500px]:scale-[0.8] landscape:max-h-[500px]:origin-center transition-transform duration-300">
         
         {showContent === 'Meet the Animals' ? (
            <AnimalBook onBack={() => handleNav(null)} />
@@ -594,45 +594,46 @@ export default function HomePage() {
       {/* GEM KIDS WELCOME / ONBOARDING MODAL */}
       {showWelcome && (
           <div className="fixed inset-0 z-1000 flex items-center justify-center bg-black/60 backdrop-blur-md animate-in fade-in">
-              <div className="bg-white p-8 md:p-10 rounded-[2.5rem] shadow-2xl max-w-lg w-[90%] border-t-8 border-[#FF9F1C] relative">
+              <div className="bg-white p-6 md:p-10 rounded-[2.5rem] shadow-2xl max-w-lg w-[90%] border-t-8 border-[#FF9F1C] relative flex flex-col max-h-[90vh]">
                   {/* Decorative Icon */}
-                  <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-24 h-24 rounded-full bg-white border-8 border-[#FF9F1C] flex items-center justify-center shadow-lg">
-                      <span className="text-4xl">🌟</span>
+                  <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-20 h-20 rounded-full bg-white border-8 border-[#FF9F1C] flex items-center justify-center shadow-lg z-10 sm:flex">
+                      <span className="text-3xl">🌟</span>
                   </div>
                   
-                  <div className="mt-8 text-center">
-                      <h2 className="text-3xl font-black text-gray-800 mb-2 font-serif italic tracking-wide">Welcome to GEM Kids!</h2>
-                      <p className="text-gray-500 font-bold mb-8">Your interactive, offline-ready encyclopedia.</p>
+                  {/* Scrollable Inner Content */}
+                  <div className="mt-4 sm:mt-8 text-center overflow-y-auto pr-2" style={{ scrollbarWidth: 'thin' }}>
+                      <h2 className="text-2xl sm:text-3xl font-black text-gray-800 mb-2 font-serif italic tracking-wide">Welcome to GEM Kids!</h2>
+                      <p className="text-gray-500 font-bold mb-6 text-sm sm:text-base">Your interactive, offline-ready encyclopedia.</p>
                       
-                      <div className="space-y-4 text-left">
-                          <div className="flex gap-4 items-start bg-orange-50 p-4 rounded-2xl border border-orange-100">
+                      <div className="space-y-3 sm:space-y-4 text-left">
+                          <div className="flex gap-4 items-start bg-orange-50 p-3 sm:p-4 rounded-2xl border border-orange-100">
                               <div className="bg-orange-200 w-10 h-10 rounded-full flex items-center justify-center shrink-0 mt-1"><span className="text-xl">📡</span></div>
                               <div>
-                                  <h4 className="font-black text-gray-800 text-lg">1. Let it Load</h4>
-                                  <p className="text-sm text-gray-600 font-medium leading-snug">The app needs a few moments to download its data. Once it finishes, you can turn off your internet and play 100% offline!</p>
+                                  <h4 className="font-black text-gray-800 text-base sm:text-lg">1. Let it Load</h4>
+                                  <p className="text-xs sm:text-sm text-gray-600 font-medium leading-snug">The app needs a few moments to download its data. Once it finishes, you can turn off your internet and play 100% offline!</p>
                               </div>
                           </div>
                           
-                          <div className="flex gap-4 items-start bg-lime-50 p-4 rounded-2xl border border-lime-100">
+                          <div className="flex gap-4 items-start bg-lime-50 p-3 sm:p-4 rounded-2xl border border-lime-100">
                               <div className="bg-lime-200 w-10 h-10 rounded-full flex items-center justify-center shrink-0 mt-1"><span className="text-xl">🖱️</span></div>
                               <div>
-                                  <h4 className="font-black text-gray-800 text-lg">2. How to Play</h4>
-                                  <p className="text-sm text-gray-600 font-medium leading-snug">Click on any of the category blocks (Animals, STEM, History, etc.) to open the app drawer and start exploring.</p>
+                                  <h4 className="font-black text-gray-800 text-base sm:text-lg">2. How to Play</h4>
+                                  <p className="text-xs sm:text-sm text-gray-600 font-medium leading-snug">Click on any of the category blocks (Animals, STEM, History, etc.) to open the app drawer and start exploring.</p>
                               </div>
                           </div>
 
-                          <div className="flex gap-4 items-start bg-blue-50 p-4 rounded-2xl border border-blue-100">
+                          <div className="flex gap-4 items-start bg-blue-50 p-3 sm:p-4 rounded-2xl border border-blue-100">
                               <div className="bg-blue-200 w-10 h-10 rounded-full flex items-center justify-center shrink-0 mt-1"><span className="text-xl">🚀</span></div>
                               <div>
-                                  <h4 className="font-black text-gray-800 text-lg">3. More Coming Soon!</h4>
-                                  <p className="text-sm text-gray-600 font-medium leading-snug">If you see a "Coming Soon" message, don't worry! New games and features are being built in the GEM Lab for Version 2.0.</p>
+                                  <h4 className="font-black text-gray-800 text-base sm:text-lg">3. More Coming Soon!</h4>
+                                  <p className="text-xs sm:text-sm text-gray-600 font-medium leading-snug">If you see a "Coming Soon" message, don't worry! New games and features are being built in the GEM Lab for Version 2.0.</p>
                               </div>
                           </div>
                       </div>
 
                       <button 
                           onClick={closeWelcomeScreen} 
-                          className="mt-8 bg-[#FF9F1C] hover:bg-orange-500 text-white w-full py-4 rounded-full font-black text-xl uppercase tracking-wider shadow-lg transition-transform hover:scale-105 active:scale-95"
+                          className="mt-6 sm:mt-8 bg-[#FF9F1C] hover:bg-orange-500 text-white w-full py-3 sm:py-4 rounded-full font-black text-lg sm:text-xl uppercase tracking-wider shadow-lg transition-transform hover:scale-105 active:scale-95 shrink-0"
                       >
                           Start Exploring!
                       </button>
@@ -644,41 +645,43 @@ export default function HomePage() {
       {/* SMART PWA INSTALL MODAL */}
       {showInstallPrompt && (
           <div className="fixed inset-0 z-500 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in">
-              <div className="bg-white p-8 rounded-4xl shadow-2xl max-w-sm w-[90%] text-center border-t-8 border-[#3B82F6]">
-                  <div className="w-16 h-16 rounded-2xl bg-blue-100 flex items-center justify-center mx-auto mb-4 shadow-inner">
-                      <span className="text-3xl">📲</span>
-                  </div>
-                  <h3 className="text-2xl font-black text-gray-800 mb-2 font-serif italic">Get the App!</h3>
-                  
-                  {isIOS ? (
-                      <div className="text-gray-600 font-bold mb-6 text-sm text-left bg-gray-50 p-4 rounded-xl border border-gray-100">
-                          <p className="mb-2 text-center text-red-500">Apple requires a manual install:</p>
-                          <p>1. Tap the <b>Share</b> icon at the bottom of Safari.</p>
-                          <p>2. Scroll down and tap <b>&quot;Add to Home Screen&quot;</b>.</p>
-                          <p>3. Play offline anytime!</p>
+              <div className="bg-white p-6 md:p-8 rounded-4xl shadow-2xl max-w-sm w-[90%] text-center border-t-8 border-[#3B82F6] flex flex-col max-h-[90vh]">
+                  <div className="overflow-y-auto pr-2" style={{ scrollbarWidth: 'thin' }}>
+                      <div className="w-16 h-16 rounded-2xl bg-blue-100 flex items-center justify-center mx-auto mb-4 shadow-inner shrink-0">
+                          <span className="text-3xl">📲</span>
                       </div>
-                  ) : (
-                      <p className="text-gray-600 font-bold mb-6">
-                          Install GEM Kids directly to your device for full offline access and a true OS experience!
-                      </p>
-                  )}
-
-                  <div className="flex gap-4 justify-center">
-                      <button 
-                          onClick={() => setShowInstallPrompt(false)} 
-                          className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-full font-black uppercase tracking-wider transition-transform active:scale-95"
-                      >
-                          Later
-                      </button>
+                      <h3 className="text-2xl font-black text-gray-800 mb-2 font-serif italic">Get the App!</h3>
                       
-                      {!isIOS && (
-                          <button 
-                              onClick={handleInstallClick} 
-                              className="bg-[#3B82F6] hover:bg-blue-600 text-white px-6 py-3 rounded-full font-black uppercase tracking-wider shadow-lg transition-transform active:scale-95"
-                          >
-                              Install Now
-                          </button>
+                      {isIOS ? (
+                          <div className="text-gray-600 font-bold mb-6 text-sm text-left bg-gray-50 p-4 rounded-xl border border-gray-100">
+                              <p className="mb-2 text-center text-red-500">Apple requires a manual install:</p>
+                              <p>1. Tap the <b>Share</b> icon at the bottom of Safari.</p>
+                              <p>2. Scroll down and tap <b>&quot;Add to Home Screen&quot;</b>.</p>
+                              <p>3. Play offline anytime!</p>
+                          </div>
+                      ) : (
+                          <p className="text-gray-600 font-bold mb-6 text-sm md:text-base">
+                              Install GEM Kids directly to your device for full offline access and a true OS experience!
+                          </p>
                       )}
+
+                      <div className="flex gap-4 justify-center shrink-0">
+                          <button 
+                              onClick={() => setShowInstallPrompt(false)} 
+                              className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-full font-black uppercase tracking-wider transition-transform active:scale-95 text-sm md:text-base"
+                          >
+                              Later
+                          </button>
+                          
+                          {!isIOS && (
+                              <button 
+                                  onClick={handleInstallClick} 
+                                  className="bg-[#3B82F6] hover:bg-blue-600 text-white px-6 py-3 rounded-full font-black uppercase tracking-wider shadow-lg transition-transform active:scale-95 text-sm md:text-base"
+                              >
+                                  Install Now
+                              </button>
+                          )}
+                      </div>
                   </div>
               </div>
           </div>
@@ -700,44 +703,45 @@ export default function HomePage() {
       {/* CUSTOM OS ALERT MODAL */}
       {osAlert && (
           <div className="fixed inset-0 z-200 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-in zoom-in duration-200">
-              <div className="bg-white p-8 rounded-4xl shadow-2xl max-w-sm w-[90%] text-center border-t-8 border-[#84CC16]">
-                  <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner ${osAlert.includes('shut down') ? 'bg-red-100 text-red-500' : 'bg-lime-100 text-lime-600'}`}>
-                      <Settings size={32} className={osAlert.includes('shut down') ? '' : 'animate-spin-slow'} />
-                  </div>
-                  <h3 className="text-2xl font-black text-gray-800 mb-2 font-serif italic">GEM System</h3>
-                  <p className="text-gray-600 font-bold mb-8">{osAlert}</p>
-                  
-                  {osAlert.includes('shut down') ? (
-                      <div className="flex gap-4 justify-center">
+              <div className="bg-white p-6 md:p-8 rounded-4xl shadow-2xl max-w-sm w-[90%] text-center border-t-8 border-[#84CC16] flex flex-col max-h-[90vh]">
+                  <div className="overflow-y-auto pr-2" style={{ scrollbarWidth: 'thin' }}>
+                      <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner shrink-0 ${osAlert.includes('shut down') ? 'bg-red-100 text-red-500' : 'bg-lime-100 text-lime-600'}`}>
+                          <Settings size={32} className={osAlert.includes('shut down') ? '' : 'animate-spin-slow'} />
+                      </div>
+                      <h3 className="text-2xl font-black text-gray-800 mb-2 font-serif italic">GEM System</h3>
+                      <p className="text-gray-600 font-bold mb-8 text-sm md:text-base">{osAlert}</p>
+                      
+                      {osAlert.includes('shut down') ? (
+                          <div className="flex gap-4 justify-center shrink-0">
+                              <button 
+                                  onClick={() => setOsAlert(null)} 
+                                  className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-full font-black uppercase tracking-wider shadow-md transition-transform hover:scale-105 active:scale-95 text-sm md:text-base"
+                              >
+                                  Cancel
+                              </button>
+                              <button 
+                                  onClick={() => {
+                                      try {
+                                          window.close();
+                                          setTimeout(() => setOsAlert("Please use the browser's X button to close the window."), 300);
+                                      } catch (e) {
+                                          setOsAlert(null);
+                                      }
+                                  }} 
+                                  className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-full font-black uppercase tracking-wider shadow-lg transition-transform hover:scale-105 active:scale-95 text-sm md:text-base"
+                              >
+                                  Shut Down
+                              </button>
+                          </div>
+                      ) : (
                           <button 
                               onClick={() => setOsAlert(null)} 
-                              className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-full font-black uppercase tracking-wider shadow-md transition-transform hover:scale-105 active:scale-95"
+                              className="bg-[#84CC16] hover:bg-lime-600 text-white px-8 py-3 rounded-full font-black uppercase tracking-wider shadow-lg transition-transform hover:scale-105 active:scale-95 text-sm md:text-base shrink-0"
                           >
-                              Cancel
+                              Got it!
                           </button>
-                          <button 
-                              onClick={() => {
-                                  try {
-                                      window.close();
-                                      // Fallback if browser blocks it 
-                                      setTimeout(() => setOsAlert("Please use the browser's X button to close the window."), 300);
-                                  } catch (e) {
-                                      setOsAlert(null);
-                                  }
-                              }} 
-                              className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-full font-black uppercase tracking-wider shadow-lg transition-transform hover:scale-105 active:scale-95"
-                          >
-                              Shut Down
-                          </button>
-                      </div>
-                  ) : (
-                      <button 
-                          onClick={() => setOsAlert(null)} 
-                          className="bg-[#84CC16] hover:bg-lime-600 text-white px-8 py-3 rounded-full font-black uppercase tracking-wider shadow-lg transition-transform hover:scale-105 active:scale-95"
-                      >
-                          Got it!
-                      </button>
-                  )}
+                      )}
+                  </div>
               </div>
           </div>
       )}
