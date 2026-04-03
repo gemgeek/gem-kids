@@ -18,7 +18,20 @@ const alphabet = [
   { id: 'J', word: 'Juice', img: '/images/juice.png', color: 'bg-yellow-500', shadow: 'shadow-yellow-400' },
   { id: 'K', word: 'Keyboard', img: '/images/keyboard.png', color: 'bg-blue-500', shadow: 'shadow-blue-400' },
   { id: 'L', word: 'Lamp', img: '/images/lamp.png', color: 'bg-orange-500', shadow: 'shadow-orange-400' },
-  
+  { id: 'M', word: 'Monkey', img: '/images/monkey.png', color: 'bg-green-500', shadow: 'shadow-green-400' },
+  { id: 'N', word: 'Neptune', img: '/images/neptune.png', color: 'bg-teal-500', shadow: 'shadow-teal-400' },
+  { id: 'O', word: 'Ostrich', img: '/images/ostrich.png', color: 'bg-purple-500', shadow: 'shadow-purple-400' },
+  { id: 'P', word: 'Panda', img: '/images/panda.png', color: 'bg-pink-500', shadow: 'shadow-pink-400' },
+  { id: 'Q', word: 'Queen', img: '/images/queen.png', color: 'bg-red-500', shadow: 'shadow-red-400' },
+  { id: 'R', word: 'Robot', img: '/images/robot.png', color: 'bg-blue-500', shadow: 'shadow-blue-400' },
+  { id: 'S', word: 'Sun', img: '/images/sun.png', color: 'bg-yellow-500', shadow: 'shadow-yellow-400' },
+  { id: 'T', word: 'Tiger', img: '/images/tiger.png', color: 'bg-orange-500', shadow: 'shadow-orange-400' },
+  { id: 'U', word: 'Umbrella', img: '/images/umbrella.png', color: 'bg-green-500', shadow: 'shadow-green-400' },
+  { id: 'V', word: 'Venus', img: '/images/venus.png', color: 'bg-teal-500', shadow: 'shadow-teal-400' },
+  { id: 'W', word: 'Whale', img: '/images/whale.png', color: 'bg-blue-500', shadow: 'shadow-blue-400' },
+  { id: 'X', word: 'Xylophone', img: '/images/xylophone.png', color: 'bg-purple-500', shadow: 'shadow-purple-400' },
+  { id: 'Y', word: 'Yarn', img: '/images/yarn.png', color: 'bg-pink-500', shadow: 'shadow-pink-400' },
+  { id: 'Z', word: 'Zebra', img: '/images/zebra.png', color: 'bg-red-500', shadow: 'shadow-red-400' },
 ];
 
 export default function LearnToRead({ onBack }: { onBack: () => void }) {
