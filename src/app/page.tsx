@@ -1,8 +1,7 @@
 'use client';
-
-import { useState } from 'react';
+import { useState, useEffect } from "react";
 import Image from 'next/image';
-import { Home, ArrowLeft, ArrowRight, Minimize, Maximize, X, Settings, Bookmark } from 'lucide-react';
+import { Home, ArrowLeft, ArrowRight, Minimize, Maximize, X, Settings, Bookmark, Info, HelpCircle, Mail, Star } from 'lucide-react';
 import MenuCard from '@/components/MenuCard';
 import CategoryPopup from '@/components/CategoryPopup';
 import { WindowBtn, NavCircleBtn } from '@/components/HeaderButtons';
@@ -57,12 +56,72 @@ export default function HomePage() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [showContent, setShowContent] = useState<string | null>(null);
   
-  // CUSTOM OS ALERT STATE 
+  // CUSTOM OS STATES
   const [osAlert, setOsAlert] = useState<string | null>(null);
+  const [activeMenu, setActiveMenu] = useState<string | null>(null); 
+  const [showWelcome, setShowWelcome] = useState(false); 
 
   // NAVIGATION HISTORY STATE 
   const [history, setHistory] = useState<(string | null)[]>([null]);
   const [historyIndex, setHistoryIndex] = useState(0);
+
+  // PWA INSTALL STATES 
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [showInstallPrompt, setShowInstallPrompt] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
+
+  useEffect(() => {
+      // ONBOARDING CHECK: Has the user seen the welcome screen before?
+      const hasSeenWelcome = localStorage.getItem('gemkids_welcome');
+      if (!hasSeenWelcome) {
+          setShowWelcome(true);
+      }
+
+      // Detect if the user is on an iPhone/iPad
+      const userAgent = window.navigator.userAgent.toLowerCase();
+      const isAppleDevice = /iphone|ipad|ipod/.test(userAgent);
+      
+      // Check if the app is already installed
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
+
+      if (isAppleDevice && !isStandalone) {
+          setIsIOS(true);
+          // Wait 3 seconds so they see the OS first, then show instructions
+          setTimeout(() => setShowInstallPrompt(true), 3000); 
+      }
+
+      // Listen for Android/Chrome install event
+      const handleBeforeInstall = (e: any) => {
+          e.preventDefault(); 
+          setDeferredPrompt(e); 
+          setTimeout(() => setShowInstallPrompt(true), 3000); 
+      };
+
+      window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+
+      // Hide modal if they successfully install it
+      window.addEventListener('appinstalled', () => {
+          setShowInstallPrompt(false);
+      });
+
+      return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+  }, []);
+
+  const handleInstallClick = async () => {
+      if (deferredPrompt) {
+          deferredPrompt.prompt(); 
+          const { outcome } = await deferredPrompt.userChoice;
+          if (outcome === 'accepted') {
+              setShowInstallPrompt(false);
+          }
+          setDeferredPrompt(null);
+      }
+  };
+
+  const closeWelcomeScreen = () => {
+      localStorage.setItem('gemkids_welcome', 'true');
+      setShowWelcome(false);
+  };
 
   // Custom Navigation function to track history
   const handleNav = (destination: string | null) => {
@@ -104,7 +163,12 @@ export default function HomePage() {
   };
 
   const handleMenuClick = (item: string) => {
-      setOsAlert(`The "${item}" menu is currently under construction in the GEM Lab!`);
+      if (item === 'File' || item === 'Help') {
+          setActiveMenu(activeMenu === item ? null : item);
+      } else {
+          setOsAlert(`The "${item}" menu is currently under construction in the GEM Lab!`);
+          setActiveMenu(null);
+      }
   };
 
   return (
@@ -112,9 +176,22 @@ export default function HomePage() {
       
       {/* BACKGROUND */}
       <div className="absolute inset-0 z-0">
-        <Image src="/images/bg-main.png" alt="Background" fill className="object-cover" priority />
-        <div className="absolute inset-0 bg-linear-to-b from-orange-400 to-orange-600 -z-10" />
+        <video 
+            autoPlay 
+            loop 
+            muted 
+            playsInline 
+            className="absolute inset-0 w-full h-full object-cover opacity-80"
+        >
+            <source src="/images/bg-jungle-temple.mp4" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-radial-gradient from-transparent to-black/80" />
       </div>
+
+      {/* INVISIBLE CLICK-AWAY BACKDROP FOR MENUS */}
+      {activeMenu && (
+        <div className="fixed inset-0 z-45" onClick={() => setActiveMenu(null)}></div>
+      )}
 
       {!showContent && (
         <>
@@ -132,12 +209,61 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* NAVIGATION BAR */}
-          <div className="relative z-40">
-             <div className="bg-[#84CC16] pt-1 pb-2 shadow-sm">
-                 <div className="flex gap-5 px-4 text-sm font-bold text-green-900 mb-2">
+          {/* NAVIGATION BAR - FIXED Z-INDEX */}
+          <div className="relative z-100">
+             <div className="bg-[#84CC16] pt-1 pb-2 shadow-sm relative z-100">
+                 <div className="flex gap-5 px-4 text-sm font-bold text-green-900 mb-2 relative">
                     {['File', 'Edit', 'View', 'Favorites', 'Tools', 'Help'].map((item) => (
-                        <span key={item} onClick={() => handleMenuClick(item)} className="cursor-pointer hover:underline hover:text-white drop-shadow-sm">{item}</span>
+                        <div key={item} className="relative">
+                            <span 
+                                onClick={() => handleMenuClick(item)} 
+                                className={`cursor-pointer hover:text-white drop-shadow-sm px-1 rounded transition-colors ${activeMenu === item ? 'bg-green-900/20 text-white' : ''}`}
+                            >
+                                {item}
+                            </span>
+                            
+                            {/* FILE DROPDOWN - FIXED Z-INDEX */}
+                            {item === 'File' && activeMenu === 'File' && (
+                                <div className="absolute top-full left-0 mt-1 w-64 bg-white rounded-lg shadow-2xl border border-gray-200 overflow-hidden animate-in slide-in-from-top-2 z-999">
+                                    <div className="p-4 border-b border-gray-100 bg-orange-50">
+                                        <div className="flex items-center gap-2 text-orange-600 font-black mb-1">
+                                            <Info size={16} /> About GEM Kids
+                                        </div>
+                                        <p className="text-xs text-gray-600 font-normal leading-tight">
+                                            GEM Kids is an interactive, digital encyclopedia built to make learning fun. Explore animals, science, arts, and history in a fully offline environment.
+                                        </p>
+                                    </div>
+                                    <div className="p-4 bg-white">
+                                        <div className="flex items-center gap-2 text-blue-600 font-black mb-1">
+                                            <span>🎮</span> How to Play
+                                        </div>
+                                        <p className="text-xs text-gray-600 font-normal leading-tight">
+                                            Click on any category on the home screen to open the app drawer. Select an activity to explore! Look out for "Coming Soon" tags for features arriving in Version 2.0.
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* HELP DROPDOWN - FIXED Z-INDEX */}
+                            {item === 'Help' && activeMenu === 'Help' && (
+                                <div className="absolute top-full left-0 mt-1 w-56 bg-white rounded-lg shadow-2xl border border-gray-200 overflow-hidden animate-in slide-in-from-top-2 z-999">
+                                    <a href="mailto:gemstudioinfo.tech@gmail.com?subject=GEM Kids Inquiry" className="flex items-center gap-3 p-3 hover:bg-blue-50 transition-colors border-b border-gray-100 group">
+                                        <Mail size={16} className="text-blue-500 group-hover:scale-110 transition-transform" />
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-bold text-gray-800">Contact Support</span>
+                                            <span className="text-[10px] font-normal text-gray-500">Email GEM Studio</span>
+                                        </div>
+                                    </a>
+                                    <a href="mailto:gemstudioinfo.tech@gmail.com?subject=GEM Kids Review/Feedback" className="flex items-center gap-3 p-3 hover:bg-yellow-50 transition-colors group">
+                                        <Star size={16} className="text-yellow-500 group-hover:scale-110 transition-transform" />
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-bold text-gray-800">Leave a Review</span>
+                                            <span className="text-[10px] font-normal text-gray-500">Help us improve the app!</span>
+                                        </div>
+                                    </a>
+                                </div>
+                            )}
+                        </div>
                     ))}
                 </div>
 
@@ -159,7 +285,7 @@ export default function HomePage() {
                  </div>
              </div>
              {/* Wave SVG */}
-             <div className="absolute top-full left-0 w-full overflow-hidden leading-0">
+             <div className="absolute top-full left-0 w-full overflow-hidden leading-0 z-40 pointer-events-none">
                  <svg className="relative block w-[calc(100%+1.3px)] h-12.5" viewBox="0 0 1200 120" preserveAspectRatio="none">
                      <path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" fill="#84CC16" className="drop-shadow-lg"></path>
                  </svg>
@@ -465,10 +591,103 @@ export default function HomePage() {
 
       </div>
 
+      {/* GEM KIDS WELCOME / ONBOARDING MODAL */}
+      {showWelcome && (
+          <div className="fixed inset-0 z-1000 flex items-center justify-center bg-black/60 backdrop-blur-md animate-in fade-in">
+              <div className="bg-white p-8 md:p-10 rounded-[2.5rem] shadow-2xl max-w-lg w-[90%] border-t-8 border-[#FF9F1C] relative">
+                  {/* Decorative Icon */}
+                  <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-24 h-24 rounded-full bg-white border-8 border-[#FF9F1C] flex items-center justify-center shadow-lg">
+                      <span className="text-4xl">🌟</span>
+                  </div>
+                  
+                  <div className="mt-8 text-center">
+                      <h2 className="text-3xl font-black text-gray-800 mb-2 font-serif italic tracking-wide">Welcome to GEM Kids!</h2>
+                      <p className="text-gray-500 font-bold mb-8">Your interactive, offline-ready encyclopedia.</p>
+                      
+                      <div className="space-y-4 text-left">
+                          <div className="flex gap-4 items-start bg-orange-50 p-4 rounded-2xl border border-orange-100">
+                              <div className="bg-orange-200 w-10 h-10 rounded-full flex items-center justify-center shrink-0 mt-1"><span className="text-xl">📡</span></div>
+                              <div>
+                                  <h4 className="font-black text-gray-800 text-lg">1. Let it Load</h4>
+                                  <p className="text-sm text-gray-600 font-medium leading-snug">The app needs a few moments to download its data. Once it finishes, you can turn off your internet and play 100% offline!</p>
+                              </div>
+                          </div>
+                          
+                          <div className="flex gap-4 items-start bg-lime-50 p-4 rounded-2xl border border-lime-100">
+                              <div className="bg-lime-200 w-10 h-10 rounded-full flex items-center justify-center shrink-0 mt-1"><span className="text-xl">🖱️</span></div>
+                              <div>
+                                  <h4 className="font-black text-gray-800 text-lg">2. How to Play</h4>
+                                  <p className="text-sm text-gray-600 font-medium leading-snug">Click on any of the category blocks (Animals, STEM, History, etc.) to open the app drawer and start exploring.</p>
+                              </div>
+                          </div>
+
+                          <div className="flex gap-4 items-start bg-blue-50 p-4 rounded-2xl border border-blue-100">
+                              <div className="bg-blue-200 w-10 h-10 rounded-full flex items-center justify-center shrink-0 mt-1"><span className="text-xl">🚀</span></div>
+                              <div>
+                                  <h4 className="font-black text-gray-800 text-lg">3. More Coming Soon!</h4>
+                                  <p className="text-sm text-gray-600 font-medium leading-snug">If you see a "Coming Soon" message, don't worry! New games and features are being built in the GEM Lab for Version 2.0.</p>
+                              </div>
+                          </div>
+                      </div>
+
+                      <button 
+                          onClick={closeWelcomeScreen} 
+                          className="mt-8 bg-[#FF9F1C] hover:bg-orange-500 text-white w-full py-4 rounded-full font-black text-xl uppercase tracking-wider shadow-lg transition-transform hover:scale-105 active:scale-95"
+                      >
+                          Start Exploring!
+                      </button>
+                  </div>
+              </div>
+          </div>
+      )}
+
+      {/* SMART PWA INSTALL MODAL */}
+      {showInstallPrompt && (
+          <div className="fixed inset-0 z-500 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in">
+              <div className="bg-white p-8 rounded-4xl shadow-2xl max-w-sm w-[90%] text-center border-t-8 border-[#3B82F6]">
+                  <div className="w-16 h-16 rounded-2xl bg-blue-100 flex items-center justify-center mx-auto mb-4 shadow-inner">
+                      <span className="text-3xl">📲</span>
+                  </div>
+                  <h3 className="text-2xl font-black text-gray-800 mb-2 font-serif italic">Get the App!</h3>
+                  
+                  {isIOS ? (
+                      <div className="text-gray-600 font-bold mb-6 text-sm text-left bg-gray-50 p-4 rounded-xl border border-gray-100">
+                          <p className="mb-2 text-center text-red-500">Apple requires a manual install:</p>
+                          <p>1. Tap the <b>Share</b> icon at the bottom of Safari.</p>
+                          <p>2. Scroll down and tap <b>&quot;Add to Home Screen&quot;</b>.</p>
+                          <p>3. Play offline anytime!</p>
+                      </div>
+                  ) : (
+                      <p className="text-gray-600 font-bold mb-6">
+                          Install GEM Kids directly to your device for full offline access and a true OS experience!
+                      </p>
+                  )}
+
+                  <div className="flex gap-4 justify-center">
+                      <button 
+                          onClick={() => setShowInstallPrompt(false)} 
+                          className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-full font-black uppercase tracking-wider transition-transform active:scale-95"
+                      >
+                          Later
+                      </button>
+                      
+                      {!isIOS && (
+                          <button 
+                              onClick={handleInstallClick} 
+                              className="bg-[#3B82F6] hover:bg-blue-600 text-white px-6 py-3 rounded-full font-black uppercase tracking-wider shadow-lg transition-transform active:scale-95"
+                          >
+                              Install Now
+                          </button>
+                      )}
+                  </div>
+              </div>
+          </div>
+      )}
+
       {/* PORTRAIT MODE WARNING FOR MOBILE */}
       <div className="hidden max-md:portrait:flex fixed inset-0 z-9999 bg-[#FF9F1C] flex-col items-center justify-center text-center p-8 text-white animate-in fade-in duration-300">
           <div className="text-7xl mb-6 flex items-center justify-center">
-              <span className="animate-[spin_3s_linear_infinite]"></span>
+              <span className="animate-[spin_3s_linear_infinite]">🔄</span>
           </div>
           <h2 className="text-4xl font-black font-serif italic mb-4 tracking-wide text-white drop-shadow-md">
               Rotate Phone!

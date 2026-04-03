@@ -26,3 +26,10 @@ body {
   transform-origin: left center;
   background: linear-gradient(-135deg, #D9F99D 0%, #BEF264 100%);
 }
+
+/* FORCE MOBILE LANDSCAPE TO SCALE DOWN */
+@media screen and (orientation: landscape) and (max-height: 500px) {
+  body {
+    zoom: 0.65; 
+  }
+}
